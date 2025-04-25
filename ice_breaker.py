@@ -23,6 +23,15 @@ info = """
 """
 
 
+def korean_chat():
+    prompt = PromptTemplate(input_variables=['person'], template='{person}라는 인물에 대해서 간단하게 설명해줘')
+    chat_gpt = ChatOpenAI(temperature=0.7, model="gpt-4o-mini")
+    chain = prompt | chat_gpt
+    response = chain.invoke(input={'person': '이재명'})
+
+    print(response)
+
+
 def main():
     print("hello Langchain")
 
@@ -34,8 +43,6 @@ def main():
     summary_prompt_template = PromptTemplate(
         input_variables=["info"], template=summary_template
     )
-    formatted_prompt = summary_prompt_template.format(info=info)
-    print(formatted_prompt)
 
     llm = ChatOpenAI(temperature=0, model="gpt-4o-mini")
 
@@ -47,10 +54,10 @@ def main():
     response = chain.invoke(input={"info": info})
 
     end_time = time.time()
-    elapsed_time = end_time - start_time
 
     print(response)
-    print(f"총 소요시간: {end_time - start_time}초")
+    print(f"총 소요시간: {(end_time - start_time):.2f}초")
+    korean_chat()
 
 
 if __name__ == "__main__":
