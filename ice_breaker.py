@@ -24,6 +24,7 @@ info = """
 
 
 def korean_chat():
+    print(f'{"=" * 30} 한글로 요청 {"=" * 30}')
     prompt = PromptTemplate(input_variables=['person'], template='{person}라는 인물에 대해서 간단하게 설명해줘')
     chat_gpt = ChatOpenAI(temperature=0.7, model="gpt-4o-mini")
     chain = prompt | chat_gpt
@@ -37,7 +38,7 @@ def main():
 
     # .env파일의 환경변수 로드
     load_dotenv()
-    # print("key: ", os.getenv("OPENAI_API_KEY"))
+    # print('key: ', os.getenv("OPENAI_API_KEY"))
 
     # 체이닝
     summary_prompt_template = PromptTemplate(
