@@ -1,9 +1,9 @@
+import os
 import time
 
 from dotenv import load_dotenv
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import PromptTemplate
-from langchain_ollama import ChatOllama
 from langchain_openai import ChatOpenAI
 
 # 사람에 대한 정보를 짧은 요약과 두개의 흥미로운 사실로 생성하길 바람
@@ -40,16 +40,17 @@ def main():
 
     # .env파일의 환경변수 로드
     load_dotenv()
-    # print('key: ', os.getenv("OPENAI_API_KEY"))
+    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+    print('key: ', OPENAI_API_KEY)
 
     # 체이닝
     summary_prompt_template = PromptTemplate(
         input_variables=["info"], template=summary_template
     )
 
-    # llm = ChatOpenAI(temperature=0, model="gpt-4o-mini")
+    llm = ChatOpenAI(temperature=0, model="gpt-4o-mini")
     # llm = ChatOllama(model="llama3")
-    llm = ChatOllama(model="mistral")
+    # llm = ChatOllama(model="mistral")
 
     # 체인으로 프롬프트, LLM 묶음
     chain = summary_prompt_template | llm | StrOutputParser()
