@@ -4,6 +4,7 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import PromptTemplate
 from langchain_openai import ChatOpenAI
 
+from agents.lookup_linkedin_url_agent import find_linkedin_profile_url
 from common.data import dasom_data_url
 from third_parties.linkedin import scrapping_linkedin_profile
 
@@ -51,8 +52,12 @@ def main():
     # llm = ChatOllama(model="llama3")
     # llm = ChatOllama(model="mistral")
 
+    result_prompt = summary_prompt_template.format_prompt(info="제니")
+
     # 체인으로 프롬프트, LLM 묶음
     chain = summary_prompt_template | llm | StrOutputParser()
+
+    # StrOutputParser: 체이닝에서 llm의 결과값 중 ['output']값만 가져올때 사용
 
     start_time = time.time()
 
@@ -60,10 +65,11 @@ def main():
 
     end_time = time.time()
 
-    print(response)
+    # print(response)
     print(f"총 소요시간: {(end_time - start_time):.2f}초")
     # korean_chat()
 
 
 if __name__ == "__main__":
-    main()
+    # main()
+    find_linkedin_profile_url(name='dasom')
