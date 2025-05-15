@@ -1,7 +1,5 @@
-import os
 import time
 
-from dotenv import load_dotenv
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import PromptTemplate
 from langchain_openai import ChatOpenAI
@@ -43,19 +41,13 @@ def korean_chat():
 
 
 def main():
-    print("hello Langchain")
-
-    # .env파일의 환경변수 로드
-    load_dotenv()
-    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-    print('key: ', OPENAI_API_KEY)
-
     # 체이닝
     summary_prompt_template = PromptTemplate(
-        input_variables=["info"], template=summary_template
+        input_variables=["info"], template=summary_template  # summary_template안의 info를 변수로 처리
     )
 
-    llm = ChatOpenAI(temperature=0, model="gpt-4o-mini")
+    # llm = ChatOpenAI(temperature=0, model="gpt-4o-mini", api_key=OPENAI_API_KEY) # 명시적으로 key 넘김
+    llm = ChatOpenAI(temperature=0, model="gpt-4o-mini")  # 환경변수 사용
     # llm = ChatOllama(model="llama3")
     # llm = ChatOllama(model="mistral")
 
@@ -64,7 +56,7 @@ def main():
 
     start_time = time.time()
 
-    response = chain.invoke(input={"info": linkedin_data})
+    response = chain.invoke(input={"info": linkedin_data})  # info값에 linkedin_data 할당
 
     end_time = time.time()
 
