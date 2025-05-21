@@ -3,6 +3,8 @@ from langchain.agents import Tool, create_react_agent, AgentExecutor
 from langchain_core.prompts import PromptTemplate
 from langchain_openai import ChatOpenAI
 
+from tools.tools import get_profile_url_tavily
+
 prompt_template = 'Given the full name of {name_of_person}, get me a link to that person"s LinkedIn profile page. Your answer should contain only the URL.'
 
 
@@ -38,12 +40,10 @@ def find_linkedin_profile_url(name: str) -> str:
     tools = [
         Tool(
             name="Find LinkedIn profile URL via Google",  # Google을 통해 LinkedIn 프로필 URL 찾기
-            func="",
+            func=get_profile_url_tavily,  # 1-4. Tool에 연결할 함수 정의
             description="useful for when you need get the Linkedin Page URL",  # LinkedIn 페이지 URL이 필요할 때 유용함
         )
     ]
-
-    # 1-4. Tool에 연결할 함수 정의 (마지막에 작성)
 
     # 2. Agent 생성
     agent = create_react_agent(llm=llm, prompt=react_prompt, tools=tools)

@@ -72,4 +72,5 @@ def main():
 
 if __name__ == "__main__":
     # main()
-    find_linkedin_profile_url(name='dasom')
+    user_linkedin_url = find_linkedin_profile_url(name='dasom kim udemy')
+    print('user_linkedin_url', user_linkedin_url)
