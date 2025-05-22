@@ -3,7 +3,7 @@ import os
 import requests
 from dotenv import load_dotenv
 
-from common.data import dasom_data_url, dasom_linkedin_url
+from common.data import dasom_data_url, linkedin_endpoint
 
 eden_data_url = "https://gist.githubusercontent.com/emarco177/0d6a3f93dd06634d95e46a2782ed7490/raw/fad4d7a87e3e934ad52ba2a968bad9eb45128665/eden-marco.json"
 
@@ -28,15 +28,13 @@ def scrapping_linkedin_profile(url: str, mock: bool = False):
         response = requests.get(url=url, timeout=10)
     else:
         print("api")
-        # 링크드인 api요청하여 데이터 가져오기
-        api_endpoint = "https://nubela.co/proxycurl/api/v2/linkedin"
-
         load_dotenv()
+        # 링크드인 api요청하여 데이터 가져오기
         headers = {"Authorization": "Bearer " + os.getenv("PROXYCURL_API_KEY")}
-        params = {"linkedin_profile_url": dasom_linkedin_url}
+        params = {"linkedin_profile_url": url}
 
         response = requests.get(
-            api_endpoint, params=params, headers=headers, timeout=10
+            linkedin_endpoint, params=params, headers=headers, timeout=10
         )
 
     data = response.json()

@@ -5,10 +5,11 @@ from langchain_openai import ChatOpenAI
 
 from tools.tools import get_profile_url_tavily
 
-prompt_template = 'Given the full name of {name_of_person}, get me a link to that person"s LinkedIn profile page. Your answer should contain only the URL.'
+prompt_template = "Given the full name of {name_of_person}, find exactly one LinkedIn profile page link. Return only the URL without any brackets, quotes, or additional symbols. Provide the precise, single URL."
 
 
-# {name_of_person}의 전체 이름이 주어졌을 때, 해당 인물의 LinkedIn 프로필 페이지 링크를 나에게 가져다 주세요. 답변은 URL만 포함해야 합니다.
+# {name_of_person}의 전체 이름이 주어졌을 때, 해당 인물의 LinkedIn 프로필 페이지 링크를 정확히 1개만 찾아 URL만 반환하세요. 대괄호, 따옴표 등 추가 기호 없이 오직 URL만 출력하세요.
+
 
 def find_linkedin_profile_url(name: str) -> str:
     """
@@ -40,7 +41,8 @@ def find_linkedin_profile_url(name: str) -> str:
     tools = [
         Tool(
             name="Find LinkedIn profile URL via Google",  # Google을 통해 LinkedIn 프로필 URL 찾기
-            func=get_profile_url_tavily,  # 1-4. Tool에 연결할 함수 정의
+            func=get_profile_url_tavily,  # 1-4. Tool에 연결할 함수 연결 (함수 자체 - 클로저 스코프로 인해 name값 자동전달)
+            # func=lambda x: get_profile_url_tavily(name=name),  # 1-4. Tool에 연결할 함수 정의 (인자 넣는경우 람다함수로 감싸기 - x : Action Input)
             description="useful for when you need get the Linkedin Page URL",  # LinkedIn 페이지 URL이 필요할 때 유용함
         )
     ]
@@ -56,6 +58,8 @@ def find_linkedin_profile_url(name: str) -> str:
         input_variables=["name_of_person"],
         template=prompt_template,
     )
-    response = agent_executor.invoke({'input': prompt.format_prompt(name_of_person=name).text})
+    response = agent_executor.invoke(
+        {"input": prompt.format_prompt(name_of_person=name).text}
+    )
 
-    return response['output']
+    return response["output"]  # 최종답변

@@ -16,6 +16,12 @@ summary_template = """
     3. please translate and respond in Korean
 """
 
+summary_prompt_template = PromptTemplate(
+    input_variables=["info"],
+    template=summary_template,  # summary_template안의 info를 변수로 처리
+)
+
+
 # 일론머스크 정보 예제
 # info = """
 #     Elon Reeve Musk (/ˈiːlɒn/ EE-lon; born June 28, 1971) is a businessman known for his leadership of Tesla, SpaceX, and X (formerly Twitter). Since 2025, he has been a senior advisor to United States president Donald Trump and the de facto head of the Department of Government Efficiency (DOGE). Musk has been the wealthiest person in the world since 2021; as of March 2025, Forbes estimates his net worth to be US$345 billion. He was named Time magazine's Person of the Year in 2021.
@@ -27,25 +33,38 @@ summary_template = """
 #     Musk's political activities and views have made him a polarizing figure. He has been criticized for making unscientific and misleading statements, including COVID-19 misinformation and promoting conspiracy theories, and affirming antisemitic, racist, and transphobic comments. His acquisition of Twitter was controversial due to a subsequent increase in hate speech and the spread of misinformation on the service. Especially since the 2024 U.S. presidential election, Musk has been heavily involved in politics as a vocal supporter of Trump. Musk was the largest donor in the 2024 U.S. presidential election and is a supporter of global far-right figures, causes, and political parties. His role in the second Trump administration, particularly in regards to DOGE, has attracted public backlash.
 # """
 
-# 링크드인 데이터로 연결
-linkedin_data = scrapping_linkedin_profile(url=dasom_data_url, mock=True)
+
+def ice_break():
+    user_linkedin_url = find_linkedin_profile_url(name="김다솜 동서울대학")
+    info_data = scrapping_linkedin_profile(url=user_linkedin_url, mock=False)
+
+    llm = ChatOpenAI(model='gpt-4o-mini', temperature=0.3)
+
+    chain = summary_prompt_template | llm | StrOutputParser()
+
+    response = chain.invoke(input={'info': info_data})
+
+    print('response', response)
 
 
 def korean_chat():
     print(f'{"=" * 30} 한글로 요청 {"=" * 30}')
-    prompt = PromptTemplate(input_variables=['person'], template='{person}라는 인물에 대해서 간단하게 설명해줘')
+    prompt = PromptTemplate(
+        input_variables=["person"],
+        template="{person}라는 인물에 대해서 간단하게 설명해줘",
+    )
     chat_gpt = ChatOpenAI(temperature=0.7, model="gpt-4o-mini")
     chain = prompt | chat_gpt
-    response = chain.invoke(input={'person': '이재명'})
+    response = chain.invoke(input={"person": "이재명"})
 
     print(response)
 
 
 def main():
     # 체이닝
-    summary_prompt_template = PromptTemplate(
-        input_variables=["info"], template=summary_template  # summary_template안의 info를 변수로 처리
-    )
+
+    # 링크드인 데이터로 연결 (gist)
+    linkedin_data = scrapping_linkedin_profile(url=dasom_data_url, mock=True)
 
     # llm = ChatOpenAI(temperature=0, model="gpt-4o-mini", api_key=OPENAI_API_KEY) # 명시적으로 key 넘김
     llm = ChatOpenAI(temperature=0, model="gpt-4o-mini")  # 환경변수 사용
@@ -61,7 +80,9 @@ def main():
 
     start_time = time.time()
 
-    response = chain.invoke(input={"info": linkedin_data})  # info값에 linkedin_data 할당
+    response = chain.invoke(
+        input={"info": linkedin_data}
+    )  # info값에 linkedin_data 할당
 
     end_time = time.time()
 
@@ -72,5 +93,4 @@ def main():
 
 if __name__ == "__main__":
     # main()
-    user_linkedin_url = find_linkedin_profile_url(name='dasom kim udemy')
-    print('user_linkedin_url', user_linkedin_url)
+    ice_break()
