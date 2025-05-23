@@ -6,6 +6,7 @@ from langchain_openai import ChatOpenAI
 
 from agents.lookup_linkedin_url_agent import find_linkedin_profile_url
 from common.data import dasom_data_url
+from output_parser import summary_parser
 from third_parties.linkedin import scrapping_linkedin_profile
 
 # 사람에 대한 정보를 짧은 요약과 두개의 흥미로운 사실로 생성하길 바람
@@ -14,37 +15,31 @@ summary_template = """
     1. a short summary
     2. two interesting facts about them
     3. please translate and respond in Korean
+    \n {format_instruction}
 """
-
+# get_format_instructions: JSON 스키마 설명을 반환하며 이값이 프롬프트({format_instruction}부분)에 추가됨
 summary_prompt_template = PromptTemplate(
-    input_variables=["info"],
+    input_variables=["info"],  # 동적으로 추가되는 변수
+    partial_variables={'format_instruction': summary_parser.get_format_instructions()},  # 정적으로 추가되는 변수
     template=summary_template,  # summary_template안의 info를 변수로 처리
 )
 
 
-# 일론머스크 정보 예제
-# info = """
-#     Elon Reeve Musk (/ˈiːlɒn/ EE-lon; born June 28, 1971) is a businessman known for his leadership of Tesla, SpaceX, and X (formerly Twitter). Since 2025, he has been a senior advisor to United States president Donald Trump and the de facto head of the Department of Government Efficiency (DOGE). Musk has been the wealthiest person in the world since 2021; as of March 2025, Forbes estimates his net worth to be US$345 billion. He was named Time magazine's Person of the Year in 2021.
-#
-#     Born to a wealthy family in Pretoria, South Africa, Musk emigrated in 1989 to Canada. He graduated from the University of Pennsylvania in the U.S. before moving to California to pursue business ventures. In 1995, Musk co-founded the software company Zip2. Following its sale in 1999, he co-founded X.com, an online payment company that later merged to form PayPal, which was acquired by eBay in 2002. That year, Musk also became a U.S. citizen.
-#
-#     In 2002, Musk founded the space technology company SpaceX, becoming its CEO and chief engineer; the company has since led innovations in reusable rockets and commercial spaceflight. Musk joined the automaker Tesla as an early investor in 2004 and became its CEO and product architect in 2008; it has since become a leader in electric vehicles. In 2015, he co-founded OpenAI to advance artificial intelligence research but later left; growing discontent with the organization's direction in the 2020s led him to establish xAI. In 2022, he acquired the social network Twitter, implementing significant changes and rebranding it as X in 2023. In January 2025, he was appointed head of Trump's newly created DOGE. His other businesses include the neurotechnology company Neuralink, which he co-founded in 2016, and the tunneling company the Boring Company, which he founded in 2017.
-#
-#     Musk's political activities and views have made him a polarizing figure. He has been criticized for making unscientific and misleading statements, including COVID-19 misinformation and promoting conspiracy theories, and affirming antisemitic, racist, and transphobic comments. His acquisition of Twitter was controversial due to a subsequent increase in hate speech and the spread of misinformation on the service. Especially since the 2024 U.S. presidential election, Musk has been heavily involved in politics as a vocal supporter of Trump. Musk was the largest donor in the 2024 U.S. presidential election and is a supporter of global far-right figures, causes, and political parties. His role in the second Trump administration, particularly in regards to DOGE, has attracted public backlash.
-# """
-
-
 def ice_break():
     user_linkedin_url = find_linkedin_profile_url(name="김다솜 동서울대학")
-    info_data = scrapping_linkedin_profile(url=user_linkedin_url, mock=False)
+    # info_data = scrapping_linkedin_profile(url=user_linkedin_url, mock=False)
+    info_data = scrapping_linkedin_profile(url=dasom_data_url, mock=True)
 
     llm = ChatOpenAI(model='gpt-4o-mini', temperature=0.3)
 
-    chain = summary_prompt_template | llm | StrOutputParser()
+    # chain = summary_prompt_template | llm | StrOutputParser()
+    chain = summary_prompt_template | llm | summary_parser
 
-    response = chain.invoke(input={'info': info_data})
-
+    response = chain.invoke(input={'info': info_data})  # Summary타입
     print('response', response)
+
+    result = response.to_dict()  # 클래스 내부함수를 통해 dict형으로 변환
+    print(f'result: {result} {type(result)}')
 
 
 def korean_chat():
