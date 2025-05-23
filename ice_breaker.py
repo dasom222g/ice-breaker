@@ -4,7 +4,7 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import PromptTemplate
 from langchain_openai import ChatOpenAI
 
-from common.data import dasom_data_url, zuck_data_url
+from common.data import dasom_data_url
 from output_parser import summary_parser, Summary
 from third_parties.linkedin import scrapping_linkedin_profile
 
@@ -24,7 +24,7 @@ summary_prompt_template = PromptTemplate(
 )
 
 
-def ice_break(name: str) -> tuple[dict, str]:
+def ice_break(name: str, url: str, mock: bool) -> tuple[dict, str]:
     """
     LinkedIn 프로필 정보를 검색하여 요약 정보를 생성하는 함수
 
@@ -39,7 +39,7 @@ def ice_break(name: str) -> tuple[dict, str]:
     print('name', name)
     # user_linkedin_url = find_linkedin_profile_url(name=name)
     # info_data: dict = scrapping_linkedin_profile(url=user_linkedin_url, mock=False)
-    info_data: dict = scrapping_linkedin_profile(url=zuck_data_url, mock=True)
+    info_data: dict = scrapping_linkedin_profile(url=url, mock=mock)
 
     llm = ChatOpenAI(model='gpt-4o-mini', temperature=0.3)
 
@@ -47,11 +47,9 @@ def ice_break(name: str) -> tuple[dict, str]:
     chain = summary_prompt_template | llm | summary_parser
 
     response: Summary = chain.invoke(input={'info': info_data})  # Summary타입
-    print('response', response)
-
     result = response.to_dict()  # 클래스 내부함수를 통해 dict형으로 변환
-    pic_url = result.get('profile_pic_url') or 'https://placehold.co/400x400/gray/white?text=Profile'
-    print(f'result: {result} {type(result)}')
+    pic_url = info_data.get('profile_pic_url') or 'https://placehold.co/400x400/gray/white?text=Profile'
+    print(f'pic: {pic_url} \n result: {result} {type(result)}')
     return result, pic_url
 
 

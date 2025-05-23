@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, jsonify
 
+from common.data import dasom_data_url
 from ice_breaker import ice_break
 
 app = Flask(__name__)  # Flask 애플리케이션 초기화
@@ -16,7 +17,7 @@ def process():
     req = request.form  # form데이터인 경우
     name = req.get('name')
     # Agent 연결
-    info_data, pic_url = ice_break(name=name)
+    info_data, pic_url = ice_break(name=name, url=dasom_data_url, mock=True)
     return jsonify({
         'data': info_data,
         'pic_url': pic_url

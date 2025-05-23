@@ -45,8 +45,6 @@
                 type: 'POST',
                 success: function (response) {
                     // UI에 뿌려주기
-
-                     console.log('response', response)
                     $('#profile-pic').show(); // Show the profile picture
                     $('#profile-pic').attr('src', response.pic_url); // Update the profile picture src attribute
                     $('#summary-and-facts').text(response.data.summary);
