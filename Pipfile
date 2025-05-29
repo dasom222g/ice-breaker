@@ -12,6 +12,7 @@ python-dotenv = "*"
 langchain = "*"
 langchain-ollama = "*"
 flask = "*"
+langsmith = "*"
 
 [dev-packages]
 
