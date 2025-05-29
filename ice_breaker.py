@@ -4,6 +4,7 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import PromptTemplate
 from langchain_openai import ChatOpenAI
 
+from agents.lookup_linkedin_url_agent import find_linkedin_profile_url
 from common.data import dasom_data_url
 from output_parser import summary_parser, Summary
 from third_parties.linkedin import scrapping_linkedin_profile
@@ -19,7 +20,9 @@ summary_template = """
 # get_format_instructions: JSON 스키마 설명을 반환하며 이값이 프롬프트({format_instruction}부분)에 추가됨
 summary_prompt_template = PromptTemplate(
     input_variables=["info"],  # 동적으로 추가되는 변수
-    partial_variables={'format_instruction': summary_parser.get_format_instructions()},  # 정적으로 추가되는 변수
+    partial_variables={
+        "format_instruction": summary_parser.get_format_instructions()
+    },  # 정적으로 추가되는 변수
     template=summary_template,  # summary_template안의 info를 변수로 처리
 )
 
@@ -30,26 +33,31 @@ def ice_break(name: str, url: str, mock: bool) -> tuple[dict, str]:
 
     Args:
         name (str): 검색할 인물의 이름 또는 식별자
+        url: (str): 검색할 인물의 링크드인 api url 혹은 gist url
+        mock: (bool): gist에 저장된 데이터 사용 여부
 
     Returns:
         tuple[dict, str]:
             - dict: 생성된 요약 정보 (Summary 클래스의 to_dict() 메소드 반환값)
             - str 프로필 사진 URL (없을 경우 기본 사진)
     """
-    print('name', name)
-    # user_linkedin_url = find_linkedin_profile_url(name=name)
+    print("name", name)
+    user_linkedin_url = find_linkedin_profile_url(name=name)
     # info_data: dict = scrapping_linkedin_profile(url=user_linkedin_url, mock=False)
     info_data: dict = scrapping_linkedin_profile(url=url, mock=mock)
 
-    llm = ChatOpenAI(model='gpt-4o-mini', temperature=0.3)
+    llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.3)
 
     # chain = summary_prompt_template | llm | StrOutputParser()
     chain = summary_prompt_template | llm | summary_parser
 
-    response: Summary = chain.invoke(input={'info': info_data})  # Summary타입
+    response: Summary = chain.invoke(input={"info": info_data})  # Summary타입
     result = response.to_dict()  # 클래스 내부함수를 통해 dict형으로 변환
-    pic_url = info_data.get('profile_pic_url') or 'https://placehold.co/400x400/gray/white?text=Profile'
-    print(f'pic: {pic_url} \n result: {result} {type(result)}')
+    pic_url = (
+        info_data.get("profile_pic_url")
+        or "https://placehold.co/400x400/gray/white?text=Profile"
+    )
+    print(f"pic: {pic_url} \n result: {result} {type(result)}")
     return result, pic_url
 
 
@@ -96,6 +104,6 @@ def main():
     print(f"총 소요시간: {(end_time - start_time):.2f}초")
     # korean_chat()
 
+
 # if __name__ == "__main__":
-# main()
-# ice_break()
+#     # main()
